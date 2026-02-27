@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, minimum-scale=1.0">
+<title>The CNAAAAME DNS Resource Record</title>
+<style>
+html {
+	--default-text-color: #313131;
+	--darkmode-background-color: #181e25;
+	--darkmode-text-color: #b1becc;
+	--primary-color: #3a86e6;
+	--secondary-color: #8751f2;
+}
+
+body {
+	font-family: monospace;
+	counter-reset: h2;
+	margin: auto;
+	font-size: 16px;
+	line-height: 1.6rem;
+	color: var(--default-text-color);
+}
+
+a {
+	color: var(--primary-color);
+}
+
+a:visited {
+	color: var(--secondary-color);
+}
+
+main {
+	margin-top: 10px;
+}
+
+p {
+	margin-top: 1.7rem;
+}
+
+.content h2 ~ p {
+	margin-top: 1.2rem;
+}
+
+.content p ~ ul, .content p ~ ol {
+	margin-top: 1.2rem;
+}
+
+h2 {
+	counter-reset: h3;
+}
+
+h3 {
+	counter-reset: h4;
+}
+
+h2.nocount:before,
+h3.nocount:before {
+	content: "";
+	counter-increment: none;
+}
+
+header {
+	margin: 2rem 0 0;
+	text-align: center;
+	padding-bottom: 1rem;
+}
+
+header * {
+	font-size: 1.2rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-weight: bold;
+	margin-top: 4rem;
+}
+
+.content p,
+.content pre,
+.content blockquote,
+.content div,
+.content ul {
+	margin-left: 1rem;
+}
+
+.content > h2:first-child {
+	margin-top: 0;
+}
+
+pre {
+	overflow-x: auto;
+	line-height: 1.4rem;
+}
+
+blockquote {
+	border: solid #aaa;
+	border-width: 0 0 0 4px;
+	padding-left: 1rem;
+	font-style: italic;
+}
+
+footer {
+	margin-top: 1.5rem;
+	text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+	body {
+		background-color: var(--darkmode-background-color);
+		color: var(--darkmode-text-color);
+	}
+}
+
+@media(min-width: 801px) {
+	body {
+		width: 60%;
+		max-width: 720px;
+	}
+}
+
+@media(max-width: 800px) {
+	body {
+		width: 90%;
+	}
+
+	header {
+		margin-bottom: 2rem;
+	}
+}
+</style>
+</head>
+<body>
+<main>
+  <article class="content">
+
+<pre>Lonely Hackers Club (LHC)                                    B. Plankton
+Request for Comments: ????                              LHC DNS Division
+Category: Standards Track                              February 26, 2026
+Obsoletes: Common Sense
+Updates: RFC 1035 (emotionally)
+
+      The IPv6-Specific Canonical Name Record (CNAAAAME)</pre>
+
+<h2 class="nocount" id="abstract">Abstract</h2>
+
+<p>This document defines a new DNS resource record (RR) type, the CNAAAAME record (type code 42069), which provides a canonical name alias specifically for IPv6 address (AAAA) lookups. While the existing CNAME record type has historically supported both IPv4 and IPv6, the lack of protocol-specific naming conventions in the canonical space has led to “address family ambiguity” that can only be resolved by adding more letters to the record name.</p>
+
+<h2 class="nocount" id="status-of-this-memo">Status of This Memo</h2>
+
+<p>This is an Internet Standards Track document.</p>
+
+<p>This document is a product of the Lonely Hackers Club (LHC).  It represents the consensus of the LHC community.  It has received public review and has been approved for publication by the LHC Engineering Steering Group (LHCSG).</p>
+
+<p>Documents approved for publication by the LHCSG are not candidates for any level of Internet Standard; see Section 2 of RFC 7841.</p>
+
+<p>Information about the current status of this document, any errata, and how to provide feedback on it may be obtained at <a href="https://www.cnaaaame.com">https://www.cnaaaame.com</a>.</p>
+
+<h2 class="nocount" id="copyright-notice">Copyright Notice</h2>
+
+<p>Copyright (c) 2026 Lonely Hackers Club and the persons identified as the document authors.  All rights reserved.</p>
+
+<p>This document is subject to BCP 78 and the LHC&rsquo;s Legal Provisions Relating to LHC Documents in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions regarding this document.</p>
+
+<h2 class="nocount" id="table-of-contents">Table of Contents</h2>
+
+<pre>  <a href="#introduction">1.</a>  Introduction . . . . . . . . . . . . . . . . . . . . . . .   2
+      <a href="#terminology">1.1.</a>  Terminology  . . . . . . . . . . . . . . . . . . . .   2
+  <a href="#motivation">2.</a>  Motivation . . . . . . . . . . . . . . . . . . . . . . . .   3
+  <a href="#the-cnaaaame-resource-record">3.</a>  The CNAAAAME Resource Record . . . . . . . . . . . . . . .   3
+      <a href="#cnaaaame-rdata-wire-format">3.1.</a>  CNAAAAME RDATA Wire Format . . . . . . . . . . . . .   4
+      <a href="#type-value">3.2.</a>  TYPE Value . . . . . . . . . . . . . . . . . . . . .   4
+      <a href="#comparison-with-cname">3.3.</a>  Comparison with CNAME  . . . . . . . . . . . . . . .   4
+  <a href="#protocol-operation">4.</a>  Protocol Operation . . . . . . . . . . . . . . . . . . . .   5
+      <a href="#resolver-behavior">4.1.</a>  Resolver Behavior  . . . . . . . . . . . . . . . . .   5
+      <a href="#authoritative-server-behavior">4.2.</a>  Authoritative Server Behavior  . . . . . . . . . . .   5
+      <a href="#coexistence-with-cname">4.3.</a>  Coexistence with CNAME . . . . . . . . . . . . . . .   5
+  <a href="#master-file-format">5.</a>  Master File Format . . . . . . . . . . . . . . . . . . . .   6
+  <a href="#backward-compatibility">6.</a>  Backward Compatibility . . . . . . . . . . . . . . . . . .   6
+  <a href="#operational-considerations">7.</a>  Operational Considerations . . . . . . . . . . . . . . . .   6
+  <a href="#security-considerations">8.</a>  Security Considerations  . . . . . . . . . . . . . . . . .   7
+  <a href="#iana-considerations">9.</a>  IANA Considerations  . . . . . . . . . . . . . . . . . . .   7
+  <a href="#future-work">10.</a> Future Work  . . . . . . . . . . . . . . . . . . . . . . .   8
+  <a href="#references">11.</a> References . . . . . . . . . . . . . . . . . . . . . . . .   8
+      <a href="#normative-references">11.1.</a> Normative References . . . . . . . . . . . . . . . .   8
+      <a href="#informative-references">11.2.</a> Informative References . . . . . . . . . . . . . . .   8
+  <a href="#acknowledgments">Acknowledgments</a>  . . . . . . . . . . . . . . . . . . . . . . .   9
+  <a href="#authors-addresses">Authors' Addresses</a> . . . . . . . . . . . . . . . . . . . . . .   9</pre>
+
+<h2 id="introduction">1. Introduction</h2>
+
+<p>The Domain Name System (DNS) [<a href="https://www.rfc-editor.org/rfc/rfc1035">RFC1035</a>] has long relied on the CNAME record to map one domain name to another.  However, the CNAME record is entirely agnostic to the underlying address family.  As the industry moves toward an IPv6-only future, maintaining a single record type that simultaneously points to both A and AAAA records is increasingly viewed as &ldquo;insufficiently specific.&rdquo;</p>
+
+<p>To ensure that IPv6 packets feel &ldquo;at home&rdquo; throughout the entire resolution process, this memo proposes the CNAAAAME record.  The extra &ldquo;AAAA&rdquo; in the middle of the name ensures that resolvers, administrators, and the packets themselves are aware that an IPv6-first mentality has been applied to the aliasing logic.</p>
+
+<p>The name &ldquo;CNAAAAME&rdquo; is derived from the concatenation of &ldquo;CN&rdquo; + &ldquo;AAAA&rdquo; + &ldquo;ME&rdquo;, reflecting the deep union of the CNAME concept with the AAAA address family.  Administrators who pronounce it aloud during configuration are advised to do so with appropriate gravitas.</p>
+
+<h3 id="terminology">1.1. Terminology</h3>
+
+<p>The key words &ldquo;MUST&rdquo;, &ldquo;MUST NOT&rdquo;, &ldquo;REQUIRED&rdquo;, &ldquo;SHALL&rdquo;, &ldquo;SHALL NOT&rdquo;, &ldquo;SHOULD&rdquo;, &ldquo;SHOULD NOT&rdquo;, &ldquo;RECOMMENDED&rdquo;, &ldquo;NOT RECOMMENDED&rdquo;, &ldquo;MAY&rdquo;, and &ldquo;OPTIONAL&rdquo; in this document are to be interpreted as described in BCP 14 [<a href="https://www.rfc-editor.org/rfc/rfc2119">RFC2119</a>] [<a href="https://www.rfc-editor.org/rfc/rfc8174">RFC8174</a>] when, and only when, they appear in all capitals, as shown here.</p>
+
+<p>The key phrase &ldquo;SHOULD FEEL BAD ABOUT&rdquo; is not defined in BCP 14 but is used in this document to indicate a moral, rather than technical, obligation upon the implementor.</p>
+
+<h2 id="motivation">2. Motivation</h2>
+
+<p>During a review of the DNS type ecosystem, the authors observed the following asymmetry:</p>
+
+<pre>    Record     Letters in Name    Address Family Specificity
+    ------     ----------------   ---------------------------
+    A          1                  IPv4 only
+    AAAA       4                  IPv6 only
+    CNAME      5                  Address-family agnostic
+    CNAAAAME   8                  IPv6 only (proposed)</pre>
+
+<p>The CNAME record, with five letters, carries no indication of its address family affiliation.  This is a crisis of identity that has persisted for a while.  In an era where even HTTP headers convey preferred color schemes, the DNS remains woefully behind in expressing protocol-level feelings.</p>
+
+<p>The authors further note that the ratio of &lsquo;A&rsquo; characters in &ldquo;AAAA&rdquo; to the &lsquo;A&rsquo; characters in &ldquo;CNAME&rdquo; is 4:0 (undefined, as division by zero is involved for the CNAME numerator when considering only consecutive &lsquo;A&rsquo; characters).  This mathematical impossibility alone justifies the creation of a new record type.</p>
+
+<h2 id="the-cnaaaame-resource-record">3. The CNAAAAME Resource Record</h2>
+
+<p>The CNAAAAME (Canonical AAAA Name) RR specifies that a domain name is an alias for another domain name, but only when the querier is specifically interested in IPv6.</p>
+
+<p>The CNAAAAME RR has the mnemonic &ldquo;CNAAAAME&rdquo; and type code 42069.</p>
+
+<h3 id="cnaaaame-rdata-wire-format">3.1. CNAAAAME RDATA Wire Format</h3>
+
+<pre>                                    1  1  1  1  1  1
+      0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+    /                   CNAAAAME                    /
+    /                                               /
+    +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+where:
+
+    CNAAAAME        A &lt;domain-name&gt; which specifies the canonical or
+                    primary name for the owner.  The name is an alias.
+                    The owner is also emotionally committed to IPv6.</pre>
+
+<p>The RDATA for a CNAAAAME record is identical in wire format to that of a standard CNAME record [<a href="https://www.rfc-editor.org/rfc/rfc1035">RFC1035</a>].  The only difference is the spiritual weight of the extra four characters in the RR type name.  Implementations MUST NOT attempt to compress this spiritual weight.</p>
+
+<h3 id="type-value">3.2. TYPE Value</h3>
+
+<p>CNAAAAME uses the DNS RR type code 42069.  This value was selected because:</p>
+
+<p>(a) it was available in the &ldquo;Unassigned&rdquo; range, and</p>
+
+<p>(b) the authors are a little bit immature.</p>
+
+<h3 id="comparison-with-cname">3.3. Comparison with CNAME</h3>
+
+<p>For clarity, the distinction between CNAME and CNAAAAME is presented below:</p>
+
+<pre>    Property              CNAME               CNAAAAME
+    --------              -----               --------
+    Wire format           &lt;domain-name&gt;       &lt;domain-name&gt;
+    Semantics             Alias               Alias (but IPv6)
+    Letters               5                   8
+    'A' characters        1                   4 (consecutive)
+    Emotional resonance   Neutral             IPv6-positive
+    Suitability for       Yes                 In a perfect world
+    production use</pre>
+
+<h2 id="protocol-operation">4. Protocol Operation</h2>
+
+<h3 id="resolver-behavior">4.1. Resolver Behavior</h3>
+
+<p>When a resolver receives a query for an AAAA record and finds a CNAAAAME record instead, it MUST follow the alias to the canonical name, in exactly the same manner as for a CNAME.</p>
+
+<p>If a resolver receives a query for an A record and encounters a CNAAAAME record, it SHOULD ignore the CNAAAAME record entirely.  The resolver SHOULD FEEL BAD ABOUT the fact that IPv4 is still in use, but MUST NOT drop the query.  The domain owner clearly did not intend for IPv4 users to follow this specific canonical path, and the resolver should respect this boundary.</p>
+
+<p>If a resolver receives a query for any other record type and encounters a CNAAAAME record, the resolver MAY follow it, but only after confirming that doing so does not undermine the IPv6-specific nature of the alias.  The exact mechanism for this confirmation is left to the implementor.</p>
+
+<h3 id="authoritative-server-behavior">4.2. Authoritative Server Behavior</h3>
+
+<p>An authoritative name server which hosts a zone containing a CNAAAAME record MUST serve it in response to queries with QTYPE=CNAAAAME or QTYPE=* (ANY).</p>
+
+<p>The server SHOULD NOT serve the CNAAAAME record in response to QTYPE=CNAME queries.  Serving a CNAAAAME when a CNAME was requested would be semantically misleading, as the querier has not demonstrated sufficient commitment to IPv6.</p>
+
+<h3 id="coexistence-with-cname">4.3. Coexistence with CNAME</h3>
+
+<p>A domain name MAY have both a CNAME and a CNAAAAME record.  In such cases, the resolver MUST enter a state of deep existential contemplation before selecting the appropriate record.  The CNAAAAME record takes precedence for AAAA queries, thereby honoring the administrator&rsquo;s explicit intention to differentiate canonical aliasing by address family.</p>
+
+<p>If a domain name has a CNAAAAME record but no corresponding CNAME record, the administrator is making a clear political statement about the future of networking.  Resolvers MUST respect this position regardless of their own views on the matter.</p>
+
+<p>Note that [<a href="https://www.rfc-editor.org/rfc/rfc1034">RFC1034</a>], Section 3.6.2 states that a CNAME RR should be the &ldquo;only&rdquo; RR at a node.  This document updates that guidance to note that CNAAAAME records are exempt from this rule, on the grounds that they are spiritually distinct.</p>
+
+<h2 id="master-file-format">5. Master File Format</h2>
+
+<p>In master files [<a href="https://www.rfc-editor.org/rfc/rfc1035">RFC1035</a>], the CNAAAAME record follows the same syntax as CNAME:</p>
+
+<pre>    ; Zone file for example.com
+    $ORIGIN example.com.
+    $TTL 86400
+
+    @       IN  SOA     ns1     hostmaster (
+                                2026022601 ; Serial
+                                7200       ; Refresh
+                                3600       ; Retry
+                                1209600    ; Expire
+                                86400 )    ; Minimum TTL
+
+    @           IN  NS      ns1
+    @           IN  NS      ns2
+    ns1         IN  A       192.0.2.1
+    ns1         IN  AAAA    2001:db8::1
+    ns2         IN  A       192.0.2.2
+    ns2         IN  AAAA    2001:db8::2
+
+    ; Standard alias - address-family agnostic, morally ambiguous
+    www         IN  CNAME   webserver.example.com.
+
+    ; IPv6-aware alias - righteous and forward-looking
+    www         IN  CNAAAAME webserver.example.com.
+
+    ; The above combination ensures that IPv6 users feel seen.</pre>
+
+<p>Zone file parsers that do not recognize the CNAAAAME type SHOULD emit a warning message that is both technically accurate and mildly condescending, such as &ldquo;Unknown type CNAAAAME at line 19; consider upgrading your software to a version that respects IPv6.&rdquo;</p>
+
+<h2 id="backward-compatibility">6. Backward Compatibility</h2>
+
+<p>Legacy resolvers that do not implement CNAAAAME will treat the record as an unknown RR type, per [<a href="https://www.rfc-editor.org/rfc/rfc3597">RFC3597</a>].  This is acceptable behavior, though such resolvers SHOULD FEEL BAD ABOUT their lack of IPv6 solidarity.</p>
+
+<p>Resolvers compliant with this specification MUST NOT publicly mock legacy resolvers.  Private disappointment is acceptable.</p>
+
+<p>DNS monitoring tools, log parsers, and zone validators that encounter the CNAAAAME type for the first time may assume it is a typographical error.  Authors of such tools are encouraged to add special-case handling that detects CNAAAAME and responds with a reassuring message, e.g., &ldquo;This is not a typo.  See RFC ????.&rdquo;</p>
+
+<h2 id="operational-considerations">7. Operational Considerations</h2>
+
+<p>Operators deploying CNAAAAME records should be aware of the following:</p>
+
+<p>(a) CNAAAAME records will increase the average character count of zone files.  Capacity planning for disk and memory usage should account for an additional three bytes per record compared to CNAME.</p>
+
+<p>(b) The CNAAAAME record is RECOMMENDED for use in zones where the administrator has strong opinions about IPv6.  It is NOT RECOMMENDED for zones managed by administrators who are ambivalent about address families.</p>
+
+<p>(c) Misconfiguration of CNAAAAME records may result in situations where IPv6 queries follow a different alias chain than IPv4 queries for the same domain name.  While this is technically a feature of the proposal, it may cause confusion among operators who expect DNS to behave consistently regardless of query type.  Such operators are encouraged to reflect on whether consistency is truly a virtue or merely a crutch.</p>
+
+<p>(d) CNAAAAME chains (a CNAAAAME pointing to a name that itself has a CNAAAAME) MUST be followed iteratively, up to the limit specified in [<a href="https://www.rfc-editor.org/rfc/rfc1035">RFC1035</a>] for CNAME chains.  Each hop in the chain is an opportunity for the resolver to reaffirm its commitment to IPv6.</p>
+
+<h2 id="security-considerations">8. Security Considerations</h2>
+
+<p>The introduction of CNAAAAME increases the DNS amplification attack surface by exactly three bytes per record type name in the wire format.  Security practitioners are advised to update their regex filters accordingly.  The regular expression <code>C(N(A{0,4}))+ME</code> may prove useful, though matching it correctly is left as an exercise for the reader.</p>
+
+<p>As with CNAME, CNAAAAME records may be used in alias chains that redirect queries to unexpected destinations.  However, because the CNAAAAME record is IPv6-specific, such attacks will only succeed against parties who have adopted IPv6 &mdash; a demographic that, the authors note, has already demonstrated a willingness to endure suffering.</p>
+
+<p>Furthermore, there is a risk that legacy systems will perceive the &ldquo;AAAA&rdquo; within &ldquo;CNAAAAME&rdquo; as a typographical error.  This is a feature, not a bug, as it encourages the immediate retirement of non-compliant hardware.  Administrators MAY include a TXT record alongside each CNAAAAME record reading &ldquo;This is intentional.  Please update your parser.&rdquo; to mitigate helpdesk ticket volume.</p>
+
+<p>DNSSEC [<a href="https://www.rfc-editor.org/rfc/rfc4033">RFC4033</a>] validation of CNAAAAME records follows the same procedures as for CNAME records.  The RRSIG for a CNAAAAME RRset provides cryptographic assurance not only that the record has not been tampered with, but also that the zone administrator&rsquo;s preference for IPv6 is authentic and has not been forged by a man-in-the-middle with inferior address-family loyalties.</p>
+
+<h2 id="iana-considerations">9. IANA Considerations</h2>
+
+<p>IANA is requested to assign the following entry in the &ldquo;Resource Record (RR) TYPEs&rdquo; registry:</p>
+
+<pre>    Type       Value     Meaning                        Reference
+    ------     ------    --------                        ---------
+    CNAAAAME   42069     IPv6-Specific Canonical Name    RFC ????</pre>
+
+<p>If the value 42069 is unavailable, the authors request the next available value in the &ldquo;Highly Specific and Somewhat Redundant&rdquo; sub-registry, which IANA is also requested to create.</p>
+
+<p>The &ldquo;Highly Specific and Somewhat Redundant&rdquo; sub-registry SHALL use the &ldquo;Specification Required&rdquo; registration policy as defined in [<a href="https://www.rfc-editor.org/rfc/rfc8126">RFC8126</a>].  The designated expert is expected to verify that any proposed record type is at least as unnecessary as CNAAAAME before approving registration.</p>
+
+<h2 id="future-work">10. Future Work</h2>
+
+<p>The CNAAAAME record is a vital first step toward a future where every component of the DNS type system is annotated with its preferred address family.  Subsequent documents in this series are anticipated to define:</p>
+
+<pre>    Type           Meaning
+    ----           -------
+    SOAAAA         Start of authority for IPv6-forward zones
+    CAAAAA         Constraining acceptable CAs for a host/domain</pre>
+
+<p>The authors note that the logical end state of this work is a DNS in which every record type exists in both an A-variant and an AAAA-variant, effectively doubling the size of the type registry.  This is considered a benefit, as it will provide employment for DNS implementors for decades to come.</p>
+
+<h2 id="references">11. References</h2>
+
+<h3 id="normative-references">11.1. Normative References</h3>
+
+<p>[<a href="https://datatracker.ietf.org/doc/html/rfc1034">RFC1034</a>] Mockapetris, P., &ldquo;Domain names - concepts and facilities&rdquo;, STD 13, RFC 1034, DOI 10.17487/RFC1034, November 1987.</p>
+
+<p>[<a href="https://datatracker.ietf.org/doc/html/rfc1035">RFC1035</a>] Mockapetris, P., &ldquo;Domain names - implementation and specification&rdquo;, STD 13, RFC 1035, DOI 10.17487/RFC1035, November 1987.</p>
+
+<p>[<a href="https://datatracker.ietf.org/doc/html/rfc2119">RFC2119</a>] Bradner, S., &ldquo;Key words for use in RFCs to Indicate Requirement Levels&rdquo;, BCP 14, RFC 2119, DOI 10.17487/RFC2119, March 1997.</p>
+
+<p>[<a href="https://datatracker.ietf.org/doc/html/rfc3596">RFC3596</a>] Thomson, S., Huitema, C., Ksinant, V., and M. Souissi, &ldquo;DNS Extensions to Support IP Version 6&rdquo;, STD 88, RFC 3596, DOI 10.17487/RFC3596, October 2003.</p>
+
+<p>[<a href="https://datatracker.ietf.org/doc/html/rfc8174">RFC8174</a>] Leiba, B., &ldquo;Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words&rdquo;, BCP 14, RFC 8174, DOI 10.17487/RFC8174, May 2017.</p>
+
+<h3 id="informative-references">11.2. Informative References</h3>
+
+<p>[<a href="https://datatracker.ietf.org/doc/html/rfc3597">RFC3597</a>] Gustafsson, A., &ldquo;Handling of Unknown DNS Resource Record (RR) Types&rdquo;, RFC 3597, DOI 10.17487/RFC3597, September 2003.</p>
+
+<p>[<a href="https://datatracker.ietf.org/doc/html/rfc4033">RFC4033</a>] Arends, R., Austein, R., Larson, M., Massey, D., and S. Rose, &ldquo;DNS Security Introduction and Requirements&rdquo;, RFC 4033, DOI 10.17487/RFC4033, March 2005.</p>
+
+<p>[<a href="https://datatracker.ietf.org/doc/html/rfc8126">RFC8126</a>] Cotton, M., Leiba, B., and T. Narten, &ldquo;Guidelines for Writing an IANA Considerations Section in RFCs&rdquo;, BCP 26, RFC 8126, DOI 10.17487/RFC8126, June 2017.</p>
+
+<h2 class="nocount" id="acknowledgments">Acknowledgments</h2>
+
+<p>The authors wish to thank the following individuals for their contributions, real or imagined:</p>
+
+<ul>
+<li>The inventor of the AAAA record, whose four-letter masterpiece inspired this work.</li>
+<li>The letter &lsquo;A&rsquo;, without which none of this would have been possible.</li>
+</ul>
+
+<h2 class="nocount" id="authors-addresses">Authors' Addresses</h2>
+
+<pre>B. Plankton
+LHC DNS Division
+Localhost, ::1
+URI:   https://cnaaaame.com</pre>
+
+  </article>
+</main>
+<footer>
+  <div>
+    <div></div>
+  </div>
+</footer>
+</body>
+</html>
